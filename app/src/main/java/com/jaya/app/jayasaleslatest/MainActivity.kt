@@ -1,13 +1,13 @@
 package com.jaya.app.jayasaleslatest
 
+import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,28 +20,40 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -49,14 +61,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -81,7 +92,10 @@ class MainActivity : ComponentActivity() {
                     //SplashScreen()
                    // MobileScreen()
                    //OtpScreen()
-                    DashboardScreen()
+                    //DashboardScreen()
+                    //RouterScreen()
+                    //ProductScreen()
+                    AddStoreScreen()
 
 
                 }
@@ -194,21 +208,7 @@ fun MobileScreen(){
                     Text(text = "+91", modifier = Modifier.padding(10.dp))
 
 
-                   /* OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = "",
-                        onValueChange = {},
-                        placeholder = {
-                            Text("000-0000-000", style = TextStyle(color = Color.LightGray))
-                        },
-                        maxLines = 1,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color.LightGray,
-                            unfocusedBorderColor =  Color.LightGray,
-                        )
-                    )*/
-
-                    Divider(
+                   Divider(
                         color = Color.LightGray,
                         modifier = Modifier
                             .fillMaxHeight()  //fill the max height
@@ -255,7 +255,7 @@ fun MobileScreen(){
 }
 
 
-
+/////OTPSCREEN/////
 
 @Composable
 fun OtpScreen() {
@@ -334,11 +334,6 @@ fun OtpScreen() {
 }
 
 
-
-
-
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonOtpTextField(otp: MutableState<String>) {
@@ -360,20 +355,38 @@ fun CommonOtpTextField(otp: MutableState<String>) {
 }
 
 
-
+///////DASHBOARD//////
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(){
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Red),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
+    Scaffold(floatingActionButton = {
+        FloatingActionButton(
+            onClick = { /*TODO*/ }, shape = RoundedCornerShape(50.dp),
+            containerColor = Color(0xffECECEC),
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.plus),
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        )
+    },) {paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color.Red),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
 
-        GreetingSection()
-        FeatureSection()
+            GreetingSection()
+            FeatureSection()
+        }
+
     }
+
 }
 
 
@@ -460,6 +473,40 @@ fun GreetingSection() {
                 }
             }
         }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+            Column(modifier = Modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(modifier = Modifier,
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "")
+                
+                Text(
+                    modifier = Modifier,
+                    text = "Dream Enterprises",
+                    style = TextStyle(fontSize = 26.sp, color = Color.White)
+                )
+                Row(modifier = Modifier, 
+                    horizontalArrangement = Arrangement.Center) {
+                    Icon(modifier = Modifier.size(20.dp),painter = painterResource(id = R.drawable.location), contentDescription = "", tint = Color.White,)
+                    Text(text = "18,Padma Babu Road, Bally , Howrah", style = TextStyle(fontSize = 12.sp, color = Color.White))
+                    
+                    
+                }
+
+
+                Row(modifier = Modifier.padding(1.dp),
+                    horizontalArrangement = Arrangement.Start) {
+                    Icon(modifier = Modifier.size(15.dp),
+                        painter = painterResource(id = R.drawable.phone),
+                        contentDescription = "",
+                        tint = Color.White,
+                        )
+                    Text(text = "+91 9876543210", style = TextStyle(fontSize = 12.sp, color = Color.White))
+
+
+                }
+            }
+
+        }
     }
 }
 
@@ -472,7 +519,853 @@ fun FeatureSection() {
         color = Color.White,
         shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp)
     ) {
+        Column(modifier = Modifier.padding(5.dp)
+        ) {
 
+            Spacer(modifier = Modifier.height(20.dp))
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                    .height(80.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                ) {
+                    Row (modifier = Modifier){
+                        Image(painter = painterResource(id = R.drawable.img), contentDescription = "", modifier = Modifier.size(50.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 1.dp),
+                            text = "Parties",
+                            style = TextStyle(fontSize = 26.sp, color = Color(0xff848484))
+                        )
+                    }
+
+                    Row(modifier = Modifier) {
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Total",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "200",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Active",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "185",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+                    }
+
+
+
+                }
+            }
+
+
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                    .height(80.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                ) {
+                    Row (modifier = Modifier){
+                        Image(painter = painterResource(id = R.drawable.grp), contentDescription = "", modifier = Modifier.size(50.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 1.dp),
+                            text = "Sales",
+                            style = TextStyle(fontSize = 26.sp, color = Color(0xff848484))
+                        )
+                    }
+
+                    Row(modifier = Modifier) {
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Total",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "200",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Active",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "185",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+                    }
+
+
+
+                }
+            }
+
+
+
+
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                    .height(80.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                ) {
+                    Row (modifier = Modifier){
+                        Image(painter = painterResource(id = R.drawable.item), contentDescription = "", modifier = Modifier.size(50.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 1.dp),
+                            text = "Items",
+                            style = TextStyle(fontSize = 26.sp, color = Color(0xff848484))
+                        )
+                    }
+
+                    Row(modifier = Modifier) {
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Total",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "200",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Active",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "185",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+                    }
+
+
+
+                }
+            }
+
+
+
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                    .height(80.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                ) {
+                    Row (modifier = Modifier){
+                        Image(painter = painterResource(id = R.drawable.payment), contentDescription = "", modifier = Modifier.size(50.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 1.dp),
+                            text = "Payments",
+                            style = TextStyle(fontSize = 26.sp, color = Color(0xff848484))
+                        )
+                    }
+
+                    Row(modifier = Modifier) {
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Total",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "12000",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "Dues",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                            Text(
+                                modifier = Modifier.padding(horizontal = 1.dp),
+                                text = "1185",
+                                style = TextStyle(fontSize = 18.sp, color = Color(0xff848484))
+                            )
+                        }
+                    }
+
+
+
+                }
+            }
+        }
+    }
+}
+
+
+//////ROUTER////
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RouterScreen(){
+    Scaffold {
+        paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+        TopAppBar(
+            title = {
+                Text(
+                    "Routes", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                        color = Color.White, fontSize = 20.sp,
+                    )
+                )
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xffF22E4F)),
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+
+                    }) {
+                    Image(
+
+                        modifier = Modifier
+                            .size(30.dp)
+                            .padding(horizontal = 8.dp),
+                        painter = painterResource(id =R.drawable.wback),
+                        contentDescription = null,
+                    )
+                }
+
+            }, actions = {
+                IconButton(
+                    onClick = {
+
+                    })
+                {
+                    Image(
+                        modifier = Modifier.size(25.dp),
+                        painter = painterResource(id = R.drawable.on),
+                        contentDescription = null
+                    )
+                }
+            }
+
+            )
+
+
+            CardSection()
+
+
+    }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CardSection(){
+ Column {
+     OutlinedTextField(
+         value = "",
+         onValueChange = {},
+         modifier = Modifier
+             .fillMaxWidth()
+             .padding(vertical = 5.dp, horizontal = 10.dp),
+         textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
+         trailingIcon = {
+             IconButton(
+                 onClick = {}
+             ) {
+                 Icon(
+                     Icons.Default.Search,
+                     contentDescription = "",
+                     modifier = Modifier
+                         .size(48.dp)
+                 )
+             }
+         },
+         singleLine = true,
+         shape = RectangleShape,
+         colors = TextFieldDefaults.outlinedTextFieldColors(
+
+             textColor = Color.Black,
+             cursorColor = Color.Black,
+             focusedBorderColor = Color(0xffC0C0C0),
+             unfocusedBorderColor = Color(0xffC0C0C0)
+         )
+
+         )
+
+
+
+     Card(
+         modifier = Modifier
+             .padding(horizontal = 10.dp, vertical = 2.dp)
+             .height(80.dp),
+         shape = RoundedCornerShape(6.dp),
+         colors = CardDefaults.cardColors(
+             containerColor = Color.White
+         ),
+         elevation = CardDefaults.cardElevation(
+             defaultElevation = 10.dp
+         ), border = BorderStroke(width = 1.dp, color = Color(0xffC0C0C0))
+     ) {
+         Row(
+             horizontalArrangement = Arrangement.Start,
+             verticalAlignment = Alignment.CenterVertically,
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .padding(top = 15.dp, start = 8.dp),
+         ) {
+             Row(modifier =Modifier.weight(7f)) {
+                 Box(
+                     modifier = Modifier
+                         .size(40.dp)
+                         .clip(CircleShape)
+                         .background(Color.Red)
+                 ){
+                     Text(
+                         "B", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                             color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                         )
+                     )
+                 }
+
+                 Text(
+                     "Bally", modifier = Modifier.padding(horizontal = 10.dp), style = TextStyle(
+                         color = Color.Black, fontSize = 20.sp,
+                     )
+                 )
+             }
+
+
+             Box(
+                 modifier = Modifier
+                     .weight(1f)
+                     .padding(horizontal = 14.dp)
+                     .size(20.dp)
+                     .clip(CircleShape)
+                     .background(Color.Red)
+             )
+
+
+
+
+         }
+     }
+
+
+
+     Card(
+         modifier = Modifier
+             .padding(horizontal = 10.dp, vertical = 2.dp)
+             .height(80.dp),
+         shape = RoundedCornerShape(6.dp),
+         colors = CardDefaults.cardColors(
+             containerColor = Color.White
+         ),
+         elevation = CardDefaults.cardElevation(
+             defaultElevation = 10.dp
+         ), border = BorderStroke(width = 1.dp, color = Color(0xffC0C0C0))
+     ) {
+         Row(
+             horizontalArrangement = Arrangement.Start,
+             verticalAlignment = Alignment.CenterVertically,
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .padding(top = 15.dp, start = 8.dp),
+         ) {
+             Row(modifier =Modifier.weight(7f)) {
+                 Box(
+                     modifier = Modifier
+                         .size(40.dp)
+                         .clip(CircleShape)
+                         .background(Color.Red)
+                 ){
+                     Text(
+                         "H", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                             color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                         )
+                     )
+                 }
+
+                 Text(
+                     "Howrah", modifier = Modifier.padding(horizontal = 10.dp), style = TextStyle(
+                         color = Color.Black, fontSize = 20.sp,
+                     )
+                 )
+             }
+
+
+             Box(
+                 modifier = Modifier
+                     .weight(1f)
+                     .padding(horizontal = 14.dp)
+                     .size(20.dp)
+                     .clip(CircleShape)
+                     .background(Color.LightGray)
+             )
+
+
+
+
+         }
+     }
+
+
+
+     Card(
+         modifier = Modifier
+             .padding(horizontal = 10.dp, vertical = 2.dp)
+             .height(80.dp),
+         shape = RoundedCornerShape(6.dp),
+         colors = CardDefaults.cardColors(
+             containerColor = Color.White
+         ),
+         elevation = CardDefaults.cardElevation(
+             defaultElevation = 10.dp
+         ), border = BorderStroke(width = 1.dp, color = Color(0xffC0C0C0))
+     ) {
+         Row(
+             horizontalArrangement = Arrangement.Start,
+             verticalAlignment = Alignment.CenterVertically,
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .padding(top = 15.dp, start = 8.dp),
+         ) {
+             Row(modifier =Modifier.weight(7f)) {
+                 Box(
+                     modifier = Modifier
+                         .size(40.dp)
+                         .clip(CircleShape)
+                         .background(Color.Red)
+                 ){
+                     Text(
+                         "B", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                             color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                         )
+                     )
+                 }
+
+                 Text(
+                     "Belur", modifier = Modifier.padding(horizontal = 10.dp), style = TextStyle(
+                         color = Color.Black, fontSize = 20.sp,
+                     )
+                 )
+             }
+
+
+             Box(
+                 modifier = Modifier
+                     .weight(1f)
+                     .padding(horizontal = 14.dp)
+                     .size(20.dp)
+                     .clip(CircleShape)
+                     .background(Color.LightGray)
+             )
+
+
+
+
+         }
+     }
+ }
+}
+
+/////////productlist//////////
+
+
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProductScreen(){
+    Scaffold(floatingActionButton = {
+        FloatingActionButton(
+            onClick = { /*TODO*/ }, shape = RoundedCornerShape(50.dp),
+            containerColor = Color(0xffECECEC),
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.plus),
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        )
+    }) {
+        paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color.Red),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+
+            UpperSection()
+            LowerSection()
+        }
+    }
+
+}
+
+
+
+@Composable
+fun UpperSection(){
+
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+
+
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
+
+
+    var locationState by remember { mutableStateOf(TextFieldValue("Search Store")) }
+
+    Column(
+        modifier = Modifier
+            .height(screenHeightDp * .25f)
+            .fillMaxWidth()
+            .background(color = Color(0xffFF4155))
+            .padding(horizontal = 10.dp, vertical = 10.dp), verticalArrangement = Arrangement.SpaceBetween
+    ){
+        Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+
+
+            IconButton(modifier = Modifier,
+                onClick = { }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.wback),
+                    contentDescription = "", tint = Color.White, modifier = Modifier.size(20.dp)
+                )
+            }
+
+
+            Text(
+                "Bally", modifier = Modifier, style = TextStyle(
+                    color = Color.White, fontSize = 30.sp,
+                )
+            )
+           
+
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+               
+                IconButton(modifier = Modifier,
+                    onClick = { }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.on),
+                        contentDescription = "", tint = Color.White, modifier = Modifier
+                            .padding(top = 5.dp)
+                            .size(30.dp)
+                    )
+                }
+            }
+        }
+
+       /* Row (){
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, Color.LightGray),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .width(screenWidthDp * .95f)
+                    .height(55.dp),
+            ) {
+                Row (modifier = Modifier, verticalAlignment = Alignment.CenterVertically){
+                    
+                    Box(
+                        modifier = Modifier.paint(painter = painterResource(id =R.drawable.rr ))){
+                        Text(text = "testing")
+                    }
+
+
+                    Divider(
+                        color = Color.LightGray,
+                        modifier = Modifier
+                            .fillMaxHeight()  //fill the max height
+                            .width(1.dp)
+                    )
+
+                    BasicTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(1.dp),
+                        value = locationState,
+                        onValueChange = {
+                            locationState = it },
+                        maxLines = 1,
+
+
+                    )
+
+
+
+
+
+
+                }
+            }
+        }*/
+
+
+
+        Card(
+            border = BorderStroke(1.dp, Color.LightGray),
+            elevation = CardDefaults.cardElevation(defaultElevation = 20.dp),
+            shape = RoundedCornerShape(25.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .height(75.dp)
+                .padding(bottom = 20.dp, start = 5.dp, end = 5.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(1.dp)
+                        .background(color = Color(0xffFFEB56))
+                        .weight(1f)
+                        .fillMaxHeight(), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Enter Location",
+                        color = Color.DarkGray,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically),
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium
+                    )
+
+
+                    IconButton(onClick = {
+
+                    }) {
+                        Icon(modifier = Modifier.size(17.dp),
+                            painter = painterResource(id = R.drawable.dropdown),
+                            contentDescription = null,
+                            tint = Color.Black,
+                        )
+                    }
+
+
+
+
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(2f)
+                        .fillMaxHeight(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    BasicTextField(
+                        modifier = Modifier
+                            .padding(2.dp),
+                        value = locationState,
+                        onValueChange = {
+                            locationState = it },
+                        maxLines = 1,
+                    )
+
+
+                    IconButton(onClick = {
+
+                    }) {
+                        Icon(modifier = Modifier.size(17.dp),
+                            painter = painterResource(id = R.drawable.srch),
+                            contentDescription = null,
+                            tint = Color.Black,
+                        )
+                    }
+
+
+                }
+            }//row
+        }
+    }
+
+}
+
+
+@Composable
+fun LowerSection(){
+    Surface(
+        modifier = Modifier
+            .fillMaxSize(),
+        color = Color.White,
+        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)
+    ) {
+        Column(modifier = Modifier) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween)
+            {
+                Text(text = "Store List", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+
+                TextButton(onClick = { /*TODO*/ }) {
+                    Text(text = "View all", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.W400, color = Color(0xffB7B7B7)))
+
+                }
+            }
+
+
+
+            Divider(color =  Color(0xffB7B7B7), modifier = Modifier
+                .fillMaxWidth()
+                .width(1.dp))
+
+
+            gridView(LocalContext.current)
+        }
+
+    }
+}
+
+
+
+@Composable
+fun gridView(context: Context) {
+    val numbers = (1..12).toList()
+
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier.padding(10.dp)
+    ) {
+       items(numbers.size) {
+
+            Card(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .height(100.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 6.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ), shape = RoundedCornerShape(6.dp),
+            ) {
+
+                Column(
+
+                    Modifier
+                        .fillMaxSize()
+                        .padding(5.dp),
+
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    /*Image(
+                        painter = painterResource(id = ),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .height(60.dp)
+                            .width(60.dp)
+                            .padding(5.dp)
+                    )*/
+
+
+                    Spacer(modifier = Modifier.height(9.dp))
+
+
+                    Text(
+                        text =" ${ it+1 }",
+                        modifier = Modifier.padding(4.dp),
+                        color = Color.Black
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -480,6 +1373,87 @@ fun FeatureSection() {
 
 
 
+///////NewStore//////
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddStoreScreen(){
+
+    Scaffold {
+            paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Add New Store", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                            color = Color.White, fontSize = 20.sp,
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xffF22E4F)),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+
+                        }) {
+                        Image(
+
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(horizontal = 8.dp),
+                            painter = painterResource(id =R.drawable.wback),
+                            contentDescription = null,
+                        )
+                    }
+
+                }, actions = {
+                    IconButton(
+                        onClick = {
+
+                        })
+                    {
+                        Image(
+                            modifier = Modifier.size(25.dp),
+                            painter = painterResource(id = R.drawable.on),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+            )
+
+
+            TextFieldSection()
+
+
+        }
+    }
+
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextFieldSection(){
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(
+                modifier = Modifier.padding(horizontal = 10.dp),
+                text = "Name",
+                style = TextStyle(fontWeight = FontWeight.W500)
+            )
+            
+            
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = "",
+                onValueChange ={}, )
+        }
+}
 
 
 @Preview(showBackground = true)
