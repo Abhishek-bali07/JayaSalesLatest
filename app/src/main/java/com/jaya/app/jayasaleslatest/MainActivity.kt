@@ -2,12 +2,15 @@ package com.jaya.app.jayasaleslatest
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,8 +24,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -47,6 +57,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -64,8 +77,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.key.Key.Companion.I
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -95,9 +110,9 @@ class MainActivity : ComponentActivity() {
                     //DashboardScreen()
                     //RouterScreen()
                     //ProductScreen()
-                    AddStoreScreen()
-
-
+                    //AddStoreScreen()
+                   // StoreSearchScreen()
+                    StoreDetailScreen()
                 }
             }
         }
@@ -1145,50 +1160,6 @@ fun UpperSection(){
             }
         }
 
-       /* Row (){
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color.LightGray),
-                modifier = Modifier
-                    .padding(10.dp)
-                    .width(screenWidthDp * .95f)
-                    .height(55.dp),
-            ) {
-                Row (modifier = Modifier, verticalAlignment = Alignment.CenterVertically){
-                    
-                    Box(
-                        modifier = Modifier.paint(painter = painterResource(id =R.drawable.rr ))){
-                        Text(text = "testing")
-                    }
-
-
-                    Divider(
-                        color = Color.LightGray,
-                        modifier = Modifier
-                            .fillMaxHeight()  //fill the max height
-                            .width(1.dp)
-                    )
-
-                    BasicTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(1.dp),
-                        value = locationState,
-                        onValueChange = {
-                            locationState = it },
-                        maxLines = 1,
-
-
-                    )
-
-
-
-
-
-
-                }
-            }
-        }*/
 
 
 
@@ -1373,6 +1344,9 @@ fun gridView(context: Context) {
 
 
 
+
+
+
 ///////NewStore//////
 
 
@@ -1411,7 +1385,8 @@ fun AddStoreScreen(){
                         )
                     }
 
-                }, actions = {
+                },
+                actions = {
                     IconButton(
                         onClick = {
 
@@ -1456,6 +1431,472 @@ fun TextFieldSection(){
 }
 
 
+////////storeSearchSection//////////
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StoreSearchScreen(){
+    Scaffold {
+            paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            TopAppBar(
+                title = {
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .height(48.dp),
+                        value = "",
+                        onValueChange = {},
+                        trailingIcon = {
+                                       Icon(modifier = Modifier.size(15.dp),painter = painterResource(id = R.drawable.srch), contentDescription = "")
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.Black,
+                            containerColor = Color.White,
+                            focusedBorderColor = Color.White
+                        ))
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xffF22E4F)),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+
+                        }) {
+                        Image(
+
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(horizontal = 8.dp),
+                            painter = painterResource(id =R.drawable.wback),
+                            contentDescription = null,
+                        )
+                    }
+
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+
+                        })
+                    {
+                        Image(
+                            modifier = Modifier.size(25.dp),
+                            painter = painterResource(id = R.drawable.on),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+            )
+
+
+            PagerSection()
+
+
+        }
+    }
+
+}
+
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PagerSection(){
+
+
+    val listState = rememberLazyListState()
+    val screenHeightBy40 = LocalConfiguration.current.screenHeightDp * 0.90f
+    val screenWidthBy90 = LocalConfiguration.current.screenWidthDp * 0.95f
+
+
+
+    val storeItem = listOf("Ram Krishna Store","Ram Krishna Store","Krishna Store")
+    
+    val itemsList = (0..5).toList()
+    val pages = listOf(
+        "Visited" ,
+        "Completed",
+        "Pending",
+        "View All"
+    )
+
+
+    LazyRow {
+        items(pages) { index ->
+            Text(
+                modifier = Modifier.padding(all = 6.dp),
+                text = "$index",
+                fontSize = 20.sp, color = Color.LightGray
+
+            )
+        }
+    }
+
+
+
+
+
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+            .height(screenHeightBy40.dp),
+        userScrollEnabled = true
+    ){
+        items(storeItem){item ->
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                    .height(80.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xffFFFFFF)
+                ),
+                shape = RoundedCornerShape(6.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Row(modifier = Modifier.padding(top = 10
+                    .dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically)
+                {
+
+                    Row(modifier = Modifier.weight(3f)) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.Red)
+                        ){
+                            Text(
+                                "H", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                                    color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                                )
+                            )
+                        }
+
+                        Column (modifier = Modifier.padding(horizontal = 5.dp)){
+                            Text(
+                                item, modifier = Modifier, style = TextStyle(
+                                    color = Color.Black, fontSize = 20.sp, textAlign = TextAlign.Center
+                                )
+                            )
+
+
+                            Text(
+                                "#93SARJAPUR ROAR", modifier = Modifier, style = TextStyle(
+                                    color = Color.Gray, fontSize = 14.sp, textAlign = TextAlign.Center
+                                )
+                            )
+                        }
+                    }
+
+
+
+
+                    Column (modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp))
+                    {
+                        Text(
+                            "43923", modifier = Modifier, style = TextStyle(
+                                color = Color.Black, fontSize = 20.sp, textAlign = TextAlign.Center
+                            )
+                        )
+
+
+                        Text(
+                            "To get", modifier = Modifier, style = TextStyle(
+                                color = Color.Black, fontSize = 14.sp, textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+
+
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun StoreDataItem(
+    store: String,
+    content: () -> Unit) {
+   Card(
+       modifier = Modifier
+           .padding(horizontal = 10.dp, vertical = 2.dp)
+           .wrapContentHeight()
+           .width(150.dp),
+       colors = CardDefaults.cardColors(
+           containerColor = Color.Red
+       ),
+       shape = RoundedCornerShape(6.dp),
+       elevation = CardDefaults.cardElevation(
+           defaultElevation = 10.dp
+       )
+   ) {
+        Row(modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.Start) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.Red)
+            ){
+                Text(
+                    "H", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                        color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                    )
+                )
+            }
+        }
+   }
+}
+
+///////storeDetail////////
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StoreDetailScreen(){
+    Scaffold()
+    {
+            paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color.Red),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+
+
+           DetailSection()
+           ProductListSection()
+        }
+
+    }
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailSection() {
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+
+    Column(
+        modifier = Modifier
+            .height(screenHeightDp * .20f)
+            .fillMaxWidth()
+            .background(color = Color(0xffF22E4F))
+            .padding(vertical = 10.dp), verticalArrangement = Arrangement.SpaceBetween
+    ){
+        Row(modifier = Modifier, horizontalArrangement = Arrangement.Start) {
+
+
+            IconButton(modifier = Modifier,
+                onClick = { }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.wback),
+                    contentDescription = "", tint = Color.White, modifier = Modifier.size(20.dp)
+                )
+            }
+
+
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .height(48.dp),
+                value = "",
+                onValueChange = {},
+                trailingIcon = {
+                    Icon(modifier = Modifier.size(15.dp),painter = painterResource(id = R.drawable.srch), contentDescription = "")
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    containerColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White
+                ))
+
+
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End)
+            {
+                IconButton(modifier = Modifier,
+                    onClick = { }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.on),
+                        contentDescription = "", tint = Color.White, modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        }
+
+
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center)
+        {
+            Column(modifier = Modifier, horizontalAlignment = Alignment.CenterHorizontally)
+                {
+
+                Text(
+                    modifier = Modifier,
+                    text = "Ram Krishna Store",
+                    style = TextStyle(fontSize = 26.sp, color = Color.White)
+                )
+                Row(modifier = Modifier,
+                    horizontalArrangement = Arrangement.Center) {
+                    Icon(modifier = Modifier.size(20.dp),painter = painterResource(id = R.drawable.location), contentDescription = "", tint = Color.White,)
+                    Text(text = "#93SARJAPUR ROAR", style = TextStyle(fontSize = 18.sp, color = Color.White))
+
+
+                }
+
+
+                Row(modifier = Modifier.padding(1.dp),
+                    horizontalArrangement = Arrangement.Start) {
+                    Icon(modifier = Modifier.size(15.dp),
+                        painter = painterResource(id = R.drawable.phone),
+                        contentDescription = "",
+                        tint = Color.White,
+                    )
+                    Text(text = "+91 9876543210", style = TextStyle(fontSize = 14.sp, color = Color.White))
+
+
+                }
+            }
+
+        }
+    }
+}
+
+
+@Composable
+fun ProductListSection() {
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize(),
+        color = Color.White,
+        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)
+    ){  Column(modifier = Modifier.fillMaxWidth())
+            {
+                Row(modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 15.dp,
+                        horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                )
+                {
+                    Card(modifier = Modifier
+                        .shadow(4.dp)
+                        .height(120.dp)
+                        .width(120.dp), colors = CardDefaults.cardColors(
+                        containerColor = Color(0xffFFFFFF),
+                    )) {
+
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(modifier = Modifier.size(80.dp),
+                                painter = painterResource(id = R.drawable.mcircle),
+                                contentDescription ="" )
+                            Text(text = "Visit Shop",style = TextStyle(fontSize = 12.sp))
+
+                        }
+
+
+
+                    }
+
+
+
+                    Card(modifier = Modifier
+                        .shadow(4.dp)
+                        .height(120.dp)
+                        .width(120.dp), colors = CardDefaults.cardColors(
+                        containerColor = Color(0xffFFFFFF),
+                    )) {
+
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(modifier = Modifier.size(80.dp),
+                                painter = painterResource(id = R.drawable.sales),
+                                contentDescription ="" )
+                            Text(text = "New sales",style = TextStyle(fontSize = 12.sp))
+
+                        }
+
+
+
+                    }
+
+
+
+                    Card(modifier = Modifier
+                        .shadow(4.dp)
+                        .height(120.dp)
+                        .width(120.dp), colors = CardDefaults.cardColors(
+                        containerColor = Color(0xffFFFFFF),
+                    )) {
+
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(modifier = Modifier.size(80.dp),
+                                painter = painterResource(id = R.drawable.paymentt),
+                                contentDescription ="" )
+                            Text(text = "Payment",style = TextStyle(fontSize = 12.sp))
+
+                        }
+
+
+
+                    }
+
+
+
+                }
+
+                Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = "Past Transaction",style = TextStyle(fontSize = 12.sp))
+                    Text(text = "View all",
+                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                        color = Color(0xffF22E4F))
+                }
+            }
+
+    }
+
+}
+
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -1463,3 +1904,166 @@ fun GreetingPreview() {
 
     }
 }
+
+
+/*
+package com.jaya.app.tablist
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.jaya.app.tablist.ui.theme.TabListTheme
+
+class MainActivity : ComponentActivity() {
+    val selectedTab = mutableStateOf("Visited")
+    val stores = mutableStateListOf(
+        *List(10){
+            Store(
+                id = it,
+                name = "Shop $it",
+                amount = (500..5000).random().toFloat(),
+                stage = Store.Stage.values().random()
+            )
+        }.toTypedArray()
+    )
+    val effectiveStores = mutableStateListOf<Store>(*
+    stores.filter { it.stage==Store.Stage.Visited }.toTypedArray())
+    val onTabClicked = fun(tab: String){
+        selectedTab.value = tab
+        updateListAsTabChanged()
+    }
+
+    private fun updateListAsTabChanged() {
+        effectiveStores.apply {
+            clear()
+            when(selectedTab.value){
+                "Visited"->{
+                    addAll(stores.filter { it.stage==Store.Stage.Visited })
+                }
+                "Pending"->{
+                    addAll(stores.filter { it.stage==Store.Stage.Pending })
+                }
+                "Completed"->{
+                    addAll(stores.filter { it.stage==Store.Stage.Completed })
+                }
+                else->{
+                    addAll(stores)
+                }
+            }
+
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            TabListTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(){
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ){
+                            Text(
+                                "Visited",
+                                modifier = Modifier
+                                    .clickable{
+                                        onTabClicked("Visited")
+                                    }
+                                    .padding(12.dp),
+                                fontWeight = if(selectedTab.value=="Visited") FontWeight.Bold else FontWeight.Normal
+                            )
+                            Text(
+                                "Completed",
+                                modifier = Modifier
+                                    .clickable{
+                                        onTabClicked("Completed")
+                                    }
+                                    .padding(12.dp),
+                                fontWeight = if(selectedTab.value=="Completed") FontWeight.Bold else FontWeight.Normal
+                            )
+                            Text(
+                                "Pending",
+                                modifier = Modifier
+                                    .clickable{
+                                        onTabClicked("Pending")
+                                    }
+                                    .padding(12.dp),
+                                fontWeight = if(selectedTab.value=="Pending") FontWeight.Bold else FontWeight.Normal
+                            )
+                            Text(
+                                "All",
+                                modifier = Modifier
+                                    .clickable{
+                                        onTabClicked("All")
+                                    }
+                                    .padding(12.dp),
+                                fontWeight = if(selectedTab.value=="All") FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                        LazyColumn{
+                            items(effectiveStores){
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            BorderStroke(
+                                                width = 1.dp,
+                                                color = Color.Red
+                                            )
+                                        )
+                                        .padding(12.dp)
+                                ){
+                                    Text(it.name)
+                                    Text("Rs. "+it.amount.toString())
+                                    //Text(it.stage.name)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+data class Store(
+    val id: Any,
+    val name: String,
+    val amount: Float,
+    val stage: Stage
+){
+    enum class Stage{
+        Pending,
+        Visited,
+        Completed
+    }
+} */
