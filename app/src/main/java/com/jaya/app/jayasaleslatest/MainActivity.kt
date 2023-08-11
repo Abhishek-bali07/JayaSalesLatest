@@ -2,12 +2,9 @@ package com.jaya.app.jayasaleslatest
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,22 +20,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
@@ -46,7 +36,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -54,33 +43,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.key.Key.Companion.I
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -111,8 +95,10 @@ class MainActivity : ComponentActivity() {
                     //RouterScreen()
                     //ProductScreen()
                     //AddStoreScreen()
-                   // StoreSearchScreen()
-                    StoreDetailScreen()
+                    //StoreSearchScreen()
+                    //StoreDetailScreen()
+                    InvoiceScreen()
+
                 }
             }
         }
@@ -1435,6 +1421,7 @@ fun TextFieldSection(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreSearchScreen(){
+
     Scaffold {
             paddingValues ->
         Column(
@@ -1491,177 +1478,169 @@ fun StoreSearchScreen(){
                 }
 
             )
-
-
-            PagerSection()
-
-
+            TabSection()
         }
     }
 
 }
 
-
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PagerSection(){
-
-
-    val listState = rememberLazyListState()
-    val screenHeightBy40 = LocalConfiguration.current.screenHeightDp * 0.90f
-    val screenWidthBy90 = LocalConfiguration.current.screenWidthDp * 0.95f
-
-
-
-    val storeItem = listOf("Ram Krishna Store","Ram Krishna Store","Krishna Store")
-    
-    val itemsList = (0..5).toList()
-    val pages = listOf(
-        "Visited" ,
-        "Completed",
-        "Pending",
-        "View All"
-    )
-
-
-    LazyRow {
-        items(pages) { index ->
-            Text(
-                modifier = Modifier.padding(all = 6.dp),
-                text = "$index",
-                fontSize = 20.sp, color = Color.LightGray
-
+fun TabSection() {
+    val selectedTab = remember{mutableStateOf("Visited")}
+    val stores = remember{mutableStateListOf(
+        *List(10){
+            Store(
+                id = it,
+                name = "Ram Krishna Store",
+                address = "#93SARJAPUR ROAR",
+                amount = (500..5000).random().toFloat(),
+                stage = Store.Stage.values().random()
             )
+        }.toTypedArray()
+    )}
+    val effectiveStores = remember{mutableStateListOf<Store>(*
+    stores.filter { it.stage==Store.Stage.Visited }.toTypedArray())}
+    val onTabClicked = fun(tab: String){
+        selectedTab.value = tab
+        effectiveStores.apply {
+            clear()
+            when(selectedTab.value){
+                "Visited"->{
+                  addAll(stores.filter { it.stage == Store.Stage.Visited })
+                }
+                "Pending"->{
+                    addAll(stores.filter { it.stage == Store.Stage.Pending })
+                }
+                "Completed"->{
+                    addAll(stores.filter { it.stage == Store.Stage.Completed })
+                }
+                else->{
+                    addAll(stores)
+                }
+            }
+
         }
     }
 
-
-
-
-
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color.White)
-            .height(screenHeightBy40.dp),
-        userScrollEnabled = true
-    ){
-        items(storeItem){item ->
-            Card(
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(){
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                    .height(80.dp)
                     .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xffFFFFFF)
-                ),
-                shape = RoundedCornerShape(6.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 10.dp
+                horizontalArrangement = Arrangement.SpaceAround
+            ){
+                Text(
+                    "Visited", color =if(selectedTab.value=="Visited") Color.Black else Color(0xffDCDCDC),
+                    modifier = Modifier
+                        .clickable {
+                            onTabClicked("Visited")
+                        }
+                        .padding(12.dp),
+                    fontWeight = if(selectedTab.value=="Visited") FontWeight.Bold else FontWeight.Normal
                 )
-            ) {
-                Row(modifier = Modifier.padding(top = 10
-                    .dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically)
-                {
+                Text(
+                    "Completed",color =if(selectedTab.value=="Completed") Color.Black else Color(0xffDCDCDC),
+                    modifier = Modifier
+                        .clickable {
+                            onTabClicked("Completed")
+                        }
+                        .padding(12.dp),
+                    fontWeight = if(selectedTab.value=="Completed") FontWeight.Bold else FontWeight.Normal
+                )
+                Text(
+                    "Pending",color =if(selectedTab.value=="Pending") Color.Black else Color(0xffDCDCDC),
+                    modifier = Modifier
+                        .clickable {
+                            onTabClicked("Pending")
+                        }
+                        .padding(12.dp),
+                    fontWeight = if(selectedTab.value=="Pending") FontWeight.Bold else FontWeight.Normal
+                )
+                Text(
+                    "All",color =if(selectedTab.value=="All") Color.Black else Color(0xffDCDCDC),
+                    modifier = Modifier
+                        .clickable {
+                            onTabClicked("All")
+                        }
+                        .padding(12.dp),
+                    fontWeight = if(selectedTab.value=="All") FontWeight.Bold else FontWeight.Normal
+                )
+            }
+            LazyColumn{
+                items(effectiveStores){
 
-                    Row(modifier = Modifier.weight(3f)) {
-                        Box(
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        colors = CardDefaults.cardColors(
+                        containerColor = Color(0xffFFFFFF)),
+                        elevation = CardDefaults.cardElevation(
+                        defaultElevation = 3.dp),
+                        border = BorderStroke(1.dp, Color(0xffDDDDDD)),
+                        shape = RoundedCornerShape(2.dp)
+                        ) {
+                        Row(
                             modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.Red)
+                                .fillMaxWidth()
+                                .padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween
                         ){
-                            Text(
-                                "H", modifier = Modifier.fillMaxWidth(), style = TextStyle(
-                                    color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
-                                )
-                            )
-                        }
 
-                        Column (modifier = Modifier.padding(horizontal = 5.dp)){
-                            Text(
-                                item, modifier = Modifier, style = TextStyle(
-                                    color = Color.Black, fontSize = 20.sp, textAlign = TextAlign.Center
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Red)
+                            ){
+                                Text(
+                                    "B", modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 3.dp), style = TextStyle(
+                                        color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
+                                    )
                                 )
-                            )
+                            }
+                            Column(modifier = Modifier) {
+                                Text(it.name, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp))
+                                Text(it.address, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 14.sp, color =Color(0xFFDDDDDD) ))
+                            }
 
 
-                            Text(
-                                "#93SARJAPUR ROAR", modifier = Modifier, style = TextStyle(
-                                    color = Color.Gray, fontSize = 14.sp, textAlign = TextAlign.Center
-                                )
-                            )
+                            Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.Center) {
+                                Text("Rs. " + it.amount.toString())
+                                //Text(it.stage.name)
+                            }
                         }
                     }
-
-
-
-
-                    Column (modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 5.dp))
-                    {
-                        Text(
-                            "43923", modifier = Modifier, style = TextStyle(
-                                color = Color.Black, fontSize = 20.sp, textAlign = TextAlign.Center
-                            )
-                        )
-
-
-                        Text(
-                            "To get", modifier = Modifier, style = TextStyle(
-                                color = Color.Black, fontSize = 14.sp, textAlign = TextAlign.Center
-                            )
-                        )
-                    }
-
 
                 }
             }
         }
     }
+
 }
 
 
-@Composable
-fun StoreDataItem(
-    store: String,
-    content: () -> Unit) {
-   Card(
-       modifier = Modifier
-           .padding(horizontal = 10.dp, vertical = 2.dp)
-           .wrapContentHeight()
-           .width(150.dp),
-       colors = CardDefaults.cardColors(
-           containerColor = Color.Red
-       ),
-       shape = RoundedCornerShape(6.dp),
-       elevation = CardDefaults.cardElevation(
-           defaultElevation = 10.dp
-       )
-   ) {
-        Row(modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.Start) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color.Red)
-            ){
-                Text(
-                    "H", modifier = Modifier.fillMaxWidth(), style = TextStyle(
-                        color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center
-                    )
-                )
-            }
-        }
-   }
+
+
+
+data class Store(
+    val id: Any,
+    val name: String,
+    val address: String,
+    val amount: Float,
+    val stage: Stage
+){
+    enum class Stage{
+        Pending,
+        Visited,
+        Completed
+    }
 }
+
 
 ///////storeDetail////////
 
@@ -1788,6 +1767,53 @@ fun DetailSection() {
 @Composable
 fun ProductListSection() {
 
+
+
+    val salesBtn = remember{
+        mutableStateOf<Boolean>(false)
+    }
+
+    val paymentBtn = remember{
+        mutableStateOf<Boolean>(false)
+    }
+
+    val btnClr = remember{
+        mutableStateOf<Boolean>(false)
+    }
+    val pbtnClr = remember{
+        mutableStateOf<Boolean>(false)
+    }
+
+
+
+    val sales = remember{ mutableStateListOf(
+        *List(4){
+           Sales(
+               id = it,
+               name = "Ram Krisna Store",
+               date = "05,Aug,2023",
+               time = "12:40 Pm",
+               totalAmount = (500..5000).random().toFloat(),
+               duesAmount = (50..1500 ).random().toFloat()
+           )
+        }.toTypedArray()
+    )}
+
+    val payment = remember{ mutableStateListOf(
+        *List(5){
+            Payments(
+                id = it,
+                name = "Shop",
+                date = "05,Aug,2023",
+                time = "12:40 Pm",
+                totalAmount = (500..5000).random().toFloat(),
+                paymentMode = "Online"
+
+            )
+        }.toTypedArray()
+    )}
+
+
     Surface(
         modifier = Modifier
             .fillMaxSize(),
@@ -1795,9 +1821,12 @@ fun ProductListSection() {
         shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)
     ){  Column(modifier = Modifier.fillMaxWidth())
             {
-                Row(modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 15.dp,
-                        horizontal = 10.dp),
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = 15.dp,
+                        horizontal = 10.dp
+                    ),
                     horizontalArrangement = Arrangement.SpaceBetween
                 )
                 {
@@ -1881,17 +1910,244 @@ fun ProductListSection() {
 
                 }
 
-                Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween) 
+                {
                     Text(text = "Past Transaction",style = TextStyle(fontSize = 12.sp))
                     Text(text = "View all",
                         style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
                         color = Color(0xffF22E4F))
                 }
+
+
+                Row(modifier = Modifier.padding(horizontal = 10.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            salesBtn.value = true
+                            paymentBtn.value = false
+                            btnClr.value = true
+                            pbtnClr.value = false
+                        },
+                        shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (btnClr.value) Color(0xffF22E4F) else Color.White,
+                            contentColor = if (btnClr.value) Color.White else Color.Black
+                        ), border = BorderStroke(1.dp , color = if (btnClr.value) Color(0xffF22E4F) else Color(0xffB7B7B7))
+                    ) {
+                        Text(text = "Sales",)
+                    }
+
+
+
+
+                    OutlinedButton(modifier = Modifier.padding(horizontal = 10.dp),
+                        onClick = {
+                                    paymentBtn.value = true
+                                    salesBtn.value = false
+                                    btnClr.value = false
+                                    pbtnClr.value = true
+                        },shape = RoundedCornerShape(4.dp),colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (pbtnClr.value) Color(0xffF22E4F) else Color.White,
+                            contentColor = if (pbtnClr.value) Color.White else Color.Black
+                        ), border = BorderStroke(1.dp , color = if (pbtnClr.value) Color(0xffF22E4F) else Color(0xffB7B7B7))
+                    ) {
+                        Text(text = "Payments",)
+                    }
+                }
+
+                if (salesBtn.value){
+                    LazyColumn{
+                        items(sales){
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xffFFFFFF)),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 3.dp),
+                                border = BorderStroke(1.dp, Color(0xffDDDDDD)),
+                                shape = RoundedCornerShape(2.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween
+                                ){
+
+
+                                    Column(modifier = Modifier) {
+                                        Text(it.name, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp))
+                                        Text(it.date, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 14.sp, color =Color(0xFFDDDDDD) ))
+                                        Text(it.time, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 14.sp, color =Color(0xFFDDDDDD) ))
+                                    }
+
+
+                                    Column(modifier = Modifier,verticalArrangement = Arrangement.Center) {
+                                        Text(
+                                            text = "Total",
+                                            style = TextStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp
+                                            )
+                                        )
+                                        Text("Rs." + it.totalAmount.toString(),modifier = Modifier.padding(top = 5.dp))
+                                        //Text(it.stage.name)
+                                    }
+
+                                    Column(modifier = Modifier, verticalArrangement = Arrangement.SpaceBetween) {
+                                        Text(
+                                            text = "Dues",
+                                            style = TextStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp
+                                            )
+                                        )
+                                        Text("Rs." + it.duesAmount.toString(), modifier = Modifier.padding(top = 5.dp))
+                                        //Text(it.stage.name)
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                if(paymentBtn.value){
+                    LazyColumn{
+                        items(payment){
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xffFFFFFF)),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 3.dp),
+                                border = BorderStroke(1.dp, Color(0xffDDDDDD)),
+                                shape = RoundedCornerShape(2.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween
+                                ){
+
+
+                                    Column(modifier = Modifier) {
+                                        Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                            Text(it.name, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp))
+
+
+                                            Text("Rs." + it.totalAmount.toString() ,
+                                                style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp, color = Color.LightGray))
+                                        }
+
+                                        Text(it.date, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 14.sp, color =Color(0xFFDDDDDD) ))
+
+                                        Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                            Text(it.time, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 14.sp, color =Color(0xFFDDDDDD) ))
+
+                                            Text(it.paymentMode,style = TextStyle( fontSize = 12.sp, color = Color.Black))
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+
             }
 
     }
 
+}
+
+
+
+data class Sales(
+    val id: Any,
+    val name: String,
+    val date: String,
+    val time: String,
+    val totalAmount: Float,
+    val duesAmount:Float
+)
+
+
+data class Payments(
+    val id: Any,
+    val name: String,
+    val date: String,
+    val time: String,
+    val totalAmount: Float,
+    val paymentMode: String
+)
+
+
+////////InvoiceScreen
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InvoiceScreen(){
+    Scaffold {
+            paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Routes", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                            color = Color.White, fontSize = 20.sp,
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xffF22E4F)),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+
+                        }) {
+                        Image(
+
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(horizontal = 8.dp),
+                            painter = painterResource(id =R.drawable.wback),
+                            contentDescription = null,
+                        )
+                    }
+
+                }, actions = {
+                    IconButton(
+                        onClick = {
+
+                        })
+                    {
+                        Image(
+                            modifier = Modifier.size(25.dp),
+                            painter = painterResource(id = R.drawable.on),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+            )
+
+
+
+
+
+        }
+    }
 }
 
 
@@ -1906,164 +2162,3 @@ fun GreetingPreview() {
 }
 
 
-/*
-package com.jaya.app.tablist
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.jaya.app.tablist.ui.theme.TabListTheme
-
-class MainActivity : ComponentActivity() {
-    val selectedTab = mutableStateOf("Visited")
-    val stores = mutableStateListOf(
-        *List(10){
-            Store(
-                id = it,
-                name = "Shop $it",
-                amount = (500..5000).random().toFloat(),
-                stage = Store.Stage.values().random()
-            )
-        }.toTypedArray()
-    )
-    val effectiveStores = mutableStateListOf<Store>(*
-    stores.filter { it.stage==Store.Stage.Visited }.toTypedArray())
-    val onTabClicked = fun(tab: String){
-        selectedTab.value = tab
-        updateListAsTabChanged()
-    }
-
-    private fun updateListAsTabChanged() {
-        effectiveStores.apply {
-            clear()
-            when(selectedTab.value){
-                "Visited"->{
-                    addAll(stores.filter { it.stage==Store.Stage.Visited })
-                }
-                "Pending"->{
-                    addAll(stores.filter { it.stage==Store.Stage.Pending })
-                }
-                "Completed"->{
-                    addAll(stores.filter { it.stage==Store.Stage.Completed })
-                }
-                else->{
-                    addAll(stores)
-                }
-            }
-
-        }
-    }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            TabListTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column(){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround
-                        ){
-                            Text(
-                                "Visited",
-                                modifier = Modifier
-                                    .clickable{
-                                        onTabClicked("Visited")
-                                    }
-                                    .padding(12.dp),
-                                fontWeight = if(selectedTab.value=="Visited") FontWeight.Bold else FontWeight.Normal
-                            )
-                            Text(
-                                "Completed",
-                                modifier = Modifier
-                                    .clickable{
-                                        onTabClicked("Completed")
-                                    }
-                                    .padding(12.dp),
-                                fontWeight = if(selectedTab.value=="Completed") FontWeight.Bold else FontWeight.Normal
-                            )
-                            Text(
-                                "Pending",
-                                modifier = Modifier
-                                    .clickable{
-                                        onTabClicked("Pending")
-                                    }
-                                    .padding(12.dp),
-                                fontWeight = if(selectedTab.value=="Pending") FontWeight.Bold else FontWeight.Normal
-                            )
-                            Text(
-                                "All",
-                                modifier = Modifier
-                                    .clickable{
-                                        onTabClicked("All")
-                                    }
-                                    .padding(12.dp),
-                                fontWeight = if(selectedTab.value=="All") FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                        LazyColumn{
-                            items(effectiveStores){
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .border(
-                                            BorderStroke(
-                                                width = 1.dp,
-                                                color = Color.Red
-                                            )
-                                        )
-                                        .padding(12.dp)
-                                ){
-                                    Text(it.name)
-                                    Text("Rs. "+it.amount.toString())
-                                    //Text(it.stage.name)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-data class Store(
-    val id: Any,
-    val name: String,
-    val amount: Float,
-    val stage: Stage
-){
-    enum class Stage{
-        Pending,
-        Visited,
-        Completed
-    }
-} */
