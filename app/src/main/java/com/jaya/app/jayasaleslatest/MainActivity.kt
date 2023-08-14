@@ -49,11 +49,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +78,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.jaya.app.jayasaleslatest.ui.theme.JayaSalesLatestTheme
 
 class MainActivity : ComponentActivity() {
@@ -96,9 +106,9 @@ class MainActivity : ComponentActivity() {
                     //ProductScreen()
                     //AddStoreScreen()
                     //StoreSearchScreen()
-                    //StoreDetailScreen()
-                    InvoiceScreen()
-
+                   // StoreDetailScreen()
+                    //InvoiceScreen()
+                    VisitScreen()
                 }
             }
         }
@@ -1767,7 +1777,9 @@ fun DetailSection() {
 @Composable
 fun ProductListSection() {
 
-
+    var isSourceExpanded = remember{
+        mutableStateOf<Boolean>(false)
+    }
 
     val salesBtn = remember{
         mutableStateOf<Boolean>(false)
@@ -1831,6 +1843,9 @@ fun ProductListSection() {
                 )
                 {
                     Card(modifier = Modifier
+                        .clickable {
+                            isSourceExpanded.value = !isSourceExpanded.value
+                        }
                         .shadow(4.dp)
                         .height(120.dp)
                         .width(120.dp), colors = CardDefaults.cardColors(
@@ -1852,7 +1867,16 @@ fun ProductListSection() {
 
 
 
+
                     }
+                    ShowDialog(
+                      dialogState = isSourceExpanded,
+                      onDismissRequest = {isSourceExpanded.value = false},
+                      headerText ="Allow Sales on to access this devices location?"
+                    )
+
+
+
 
 
 
@@ -2065,9 +2089,52 @@ fun ProductListSection() {
 
             }
 
+
+
     }
 
 }
+
+@Composable
+fun ShowDialog(
+    dialogState: State<Boolean>,
+    onDismissRequest: () -> Unit,
+    headerText: String,
+) {
+    if(dialogState.value){
+        Dialog(onDismissRequest = { onDismissRequest.invoke() }){
+            Surface(
+                modifier = Modifier
+                    .width(400.dp)
+                    .height(250.dp),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(modifier = Modifier.padding(top = 5.dp), horizontalAlignment = Alignment.CenterHorizontally){
+
+
+                    Image(painter = painterResource(id = R.drawable.bl), contentDescription = "",)
+                    Text(text = headerText,style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp), textAlign = TextAlign.Center)
+                    Divider()
+                    TextButton(onClick = { /*TODO*/ }) {
+                        Text(text = "WHILE ESING THE APP",style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp, color = Color(0xff9A9A9A)), textAlign = TextAlign.Center)
+                    }
+                    Divider()
+
+                    TextButton(onClick = { /*TODO*/ }) {
+                        Text(text = "ONLY THIS TIME",style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp, color = Color(0xff9A9A9A)), textAlign = TextAlign.Center)
+                    }
+                    Divider()
+
+                    TextButton(onClick = { /*TODO*/ }) {
+                        Text(text = "DONT ALLOW",style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp, color = Color(0xff9A9A9A)), textAlign = TextAlign.Center)
+                    }
+                    Divider()
+                }
+            }
+        }
+    }
+}
+
 
 
 
@@ -2105,7 +2172,236 @@ fun InvoiceScreen(){
             TopAppBar(
                 title = {
                     Text(
-                        "Routes", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                        "Ram Krishna Stores", modifier = Modifier.fillMaxWidth(), style = TextStyle(
+                            color = Color.White, fontSize = 20.sp,
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xffF22E4F)),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+
+                        }) {
+                        Image(
+
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(horizontal = 8.dp),
+                            painter = painterResource(id =R.drawable.wback),
+                            contentDescription = null,
+                        )
+                    }
+
+                }, actions = {
+                    IconButton(
+                        onClick = {
+
+                        })
+                    {
+                        Image(
+                            modifier = Modifier.size(25.dp),
+                            painter = painterResource(id = R.drawable.on),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+            )
+
+
+                    InvoiceSection()
+
+
+
+
+
+        }
+    }
+}
+
+@Composable
+fun InvoiceSection() {
+    val itemDetails = remember{ mutableStateListOf(
+        *List(4){
+            ItemDetails(
+                id = it,
+                itemName = "Top Star Creaks Biscuit",
+                itemQty = "4",
+                itemPrice = "100",
+                totalPrice = "400",
+            )
+        }.toTypedArray()
+    )}
+     val invoiceDetails = remember { mutableStateOf(
+         InvoiceDetails(
+             taxableAmount = "1680",
+             taxes = "50",
+             discount = "00",
+             totalAmount = "1730",
+             invoiceDate = "Jun 12,2023 07:30",
+             invoiceType ="Sales",
+             invoiceAddress ="Nishchinda, Sapuipara, Howrah, West Bengal 711227",
+         )
+     )
+     }
+
+
+    Column(modifier = Modifier) {
+        Text(modifier = Modifier.padding(horizontal = 10.dp),
+            text = "Item", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W500))
+
+        LazyColumn{
+            items(itemDetails){
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xffFFFFFF)),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 1.dp),
+                    shape = RoundedCornerShape(2.dp)
+                ) {
+                    Column(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween
+                        ){
+                            Text(it.itemName, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp))
+                            Text("x${it.itemQty}", style = TextStyle(fontWeight = FontWeight.W500, fontSize = 16.sp, color =Color(0xFFDDDDDD) ))
+                            Text(it.totalPrice, style = TextStyle(fontWeight = FontWeight.W500, fontSize = 16.sp, color =Color(0xFFDDDDDD) ))
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp)
+                                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                        ){
+                            Text("${it.itemPrice}/pcs", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W500, color =Color(0xFFDDDDDD)))
+                        }
+                    }
+
+                }
+
+            }
+        }
+        Divider()
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 5.dp, bottom = 5.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Taxable Amount", style = TextStyle(fontWeight = FontWeight.W400, fontSize = 18.sp))
+                Text(invoiceDetails.value.taxableAmount, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp,color =Color(0xFFDDDDDD)))
+            }
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Taxes", style = TextStyle(fontWeight = FontWeight.W400, fontSize = 18.sp))
+                Text(invoiceDetails.value.taxes, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp,color =Color(0xFFDDDDDD)))
+            }
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Discount", style = TextStyle(fontWeight = FontWeight.W400, fontSize = 18.sp))
+                Text(invoiceDetails.value.discount, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp,color =Color(0xFFDDDDDD)))
+            }
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Total", style = TextStyle(fontWeight = FontWeight.W500, fontSize = 18.sp))
+                Text(invoiceDetails.value.totalAmount, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp,color =Color(0xFFDDDDDD)))
+            }
+        }
+        Divider()
+        Text(modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            text = "Invoice Details", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W500))
+
+
+        Column(modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)) {
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = "Amount", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W400))
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = invoiceDetails.value.totalAmount, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W500))
+        }
+
+        Column(modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)) {
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = "Date", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W400))
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = invoiceDetails.value.invoiceDate, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W500))
+        }
+
+        Column(modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)) {
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = "Type", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W400))
+
+
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = invoiceDetails.value.invoiceType, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W500))
+        }
+
+        Column(modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)) {
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = "Address", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W400))
+
+
+            Text(modifier = Modifier.padding(horizontal = 10.dp),
+                text = invoiceDetails.value.invoiceAddress, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W500))
+        }
+
+    }
+
+}
+
+
+
+
+data class ItemDetails(
+    val id: Any,
+    val itemName: String,
+    val itemQty: String,
+    val itemPrice: String,
+    val totalPrice: String,
+)
+
+
+data class InvoiceDetails(
+    val taxableAmount:String,
+    val taxes:String,
+    val discount:String,
+    val totalAmount:String,
+    val invoiceDate:String,
+    val invoiceType:String,
+    val invoiceAddress:String
+)
+
+
+////////VisitScreen///////
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VisitScreen(){
+
+    Scaffold {
+            paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Make Visit", modifier = Modifier.fillMaxWidth(), style = TextStyle(
                             color = Color.White, fontSize = 20.sp,
                         )
                     )
@@ -2144,13 +2440,68 @@ fun InvoiceScreen(){
 
 
 
+            MapSection()
+
+
 
 
         }
     }
+
+
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MapSection() {
+    Column(modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally)
+    {
+        Box(modifier = Modifier
+            .padding(10.dp)
+            .size(width = 370.dp, height = 150.dp))
+        {
+            val singapore = LatLng(1.35, 103.87)
+            val cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(singapore, 10f)
+            }
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                uiSettings = MapUiSettings(),
+                properties = MapProperties()
 
+
+
+            ) {
+
+                Marker(
+                    position = singapore,
+                    title = "Singapore",
+                    snippet = "Marker in Singapore"
+                )
+
+            }
+        }
+        
+
+        OutlinedTextField(value = "", onValueChange = {}, modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 15.dp))
+
+
+
+        Button(onClick = {
+            //your onclick code here
+        }, colors =  ButtonDefaults.buttonColors(
+                contentColor = Color(0xffFFEB56)
+        )
+        ) {
+            Text(text = "Button with elevation")
+        }
+    }
+}
 
 
 @Preview(showBackground = true)
